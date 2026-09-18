@@ -1,0 +1,51 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: sales-document-portal
+  profiles:
+    active: dev
+
+  datasource:
+    url: ${DB_URL:jdbc:h2:mem:sales_db;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE}
+    username: ${DB_USER:sa}
+    password: ${DB_PASS:}
+    driver-class-name: ${DB_DRIVER:org.h2.Driver}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      timeout: 2000
+
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
+app:
+  jwt:
+    secret: 9a6e8b1c4d7e2f5a8b3c1d4e7f0a9b2c5d8e1f4a7b0c3d6e9f2a5b8c1d4e7f0a
+    access-token-expiration-ms: 900000 # 15 minutes
+    refresh-token-expiration-ms: 604800000 # 7 days
+    cookie-name: refresh_token
+    secure-cookie: false # set true in prod profile
+
+  crypto:
+    # 256-bit AES Master key encoded in Hex (Can be fetched dynamically from Vault)
+    master-key-hex: 4e616d655365637572654d61737465724b657953616c6573506f7274616c3132
+    storage-dir: ./encrypted-documents
+
+  vault:
+    enabled: false # Set true when vault container is running with AppRole
