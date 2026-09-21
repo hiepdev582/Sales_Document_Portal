@@ -67,6 +67,52 @@ services:
       timeout: 5s
       retries: 5
 
+  # ---------------------------------------------------------------------------
+  # Backend Service: Spring Boot API
+  # ---------------------------------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: sales_portal_backend
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/sales_db
+      DB_USER: sales_user
+      DB_PASS: sales_password_secret
+      DB_DRIVER: org.postgresql.Driver
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - sales_portal_net
+
+  # ---------------------------------------------------------------------------
+  # Frontend Service: Nuxt 3 Web App
+  # ---------------------------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: sales_portal_frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 3000
+    depends_on:
+      - backend
+    networks:
+      - sales_portal_net
+
 networks:
   sales_portal_net:
     driver: bridge
